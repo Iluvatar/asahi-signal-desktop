@@ -2,14 +2,27 @@
 
 set -euo pipefail
 
-sudo dnf install g++ npm python make gcc git rpm-build libxcrypt-compat patch ruby-devel
+if [ ! "$#" -eq "1" ]; then
+    echo "Usage: ./install_signal.sh <VERSION>"
+    exit 1
+fi
+
+if [ -x /usr/bin/sudo ]; then
+    SUDO='sudo'
+else
+    SUDO='doas'
+fi
+
+"$SUDO" dnf install g++ npm python make gcc git rpm-build libxcrypt-compat patch ruby-devel
 gem install fpm
 dnf clean all
 export PATH="$PATH:/home/$(whoami)/bin" USE_SYSTEM_FPM=true SIGNAL_ENV=production
 
-[ -d Signal-Desktop ] || git clone https://github.com/signalapp/Signal-Desktop
+if [ ! -d Signal-Desktop ]; then
+    git clone https://github.com/signalapp/Signal-Desktop
+fi
 cd Signal-Desktop
-git pull
+git pull origin main
 git checkout "v$1"
 sed -i 's/"deb"$/"rpm"/' package.json
 
@@ -20,5 +33,5 @@ npm run prepare-beta-build
 npm run build-linux
 
 cd ..
-sudo dnf install "./Signal-Desktop/release/signal-desktop-$1.aarch64.rpm"
+"$SUDO" dnf install "./Signal-Desktop/release/signal-desktop-$1.aarch64.rpm"
 rm -rf Signal-Desktop
