@@ -13,7 +13,7 @@ else
     SUDO='doas'
 fi
 
-"$SUDO" dnf install g++ npm python make gcc git rpm-build libxcrypt-compat patch ruby-devel
+"$SUDO" dnf install g++ npm python make gcc git rpm-build libxcrypt-compat patch ruby-devel pnpm
 gem install fpm
 dnf clean all
 export PATH="$PATH:/home/$(whoami)/bin" USE_SYSTEM_FPM=true SIGNAL_ENV=production
